@@ -15,12 +15,20 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# Initialize session state variables
+# chat_history: stores the conversation between user and assistant
 if 'chat_history' not in st.session_state:
     st.session_state.chat_history = []
+
+# rag_pipeline: stores the RAG pipeline instance for question answering
 if 'rag_pipeline' not in st.session_state:
     st.session_state.rag_pipeline = None
+
+# is_initialized: tracks whether the knowledge base is loaded and ready
 if 'is_initialized' not in st.session_state:
     st.session_state.is_initialized = False
+
+# vector_store: holds the vector database containing embedded documents
 if 'vector_store' not in st.session_state:
     st.session_state.vector_store = None
 
