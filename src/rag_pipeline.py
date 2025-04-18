@@ -1,5 +1,5 @@
 from langchain.chains import RetrievalQA
-from langchain_community.llms import OpenAI
+from langchain.llms import OpenAI
 from langchain.prompts import PromptTemplate
 from src.embeddings import VectorStoreManager
 import os
