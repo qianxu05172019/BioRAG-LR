@@ -1,15 +1,14 @@
-
-
-# 核心依赖 - 使用更新的版本
+# 核心依赖 - 使用新版本
 streamlit>=1.20.0
-langchain>=0.0.200
+langchain>=0.1.0
+langchain-community>=0.0.10  # 添加这一行，这是关键
 openai>=0.27.8
 
-# 向量存储 - 使用更新的chromadb
+# 向量存储
 chromadb>=0.3.21
 
-# 文档处理 - 使用更通用的pypdf
-pypdf>=3.0.0
+# 文档处理
+pypdf>=3.0.0  # 更换为更通用的pypdf
 
 # 通用依赖
 python-dotenv>=0.21.0
