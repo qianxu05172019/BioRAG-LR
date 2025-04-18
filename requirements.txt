@@ -1,16 +1,14 @@
-# 核心依赖
-streamlit==1.24.0
-langchain==0.0.200
+# 核心依赖 - 使用旧版但稳定的版本
+streamlit==1.20.0
+langchain==0.0.154
 openai==0.27.8
-python-dotenv==0.21.1
 
-# 向量存储
-chromadb==0.3.26
+# 向量存储 - 使用旧版chromadb，避免依赖编译问题
+chromadb==0.3.21
 
-# 文档处理
-pypdf==3.15.1
-tiktoken==0.4.0
+# 文档处理 - 移除tiktoken，使用旧版pypdf
+pypdf3==1.0.6
 
-# 通用依赖
+# 通用依赖 - 指定旧版但稳定的版本
+python-dotenv==0.21.0
 pydantic==1.10.8
-packaging<23.2
