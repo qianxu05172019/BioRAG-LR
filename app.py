@@ -71,11 +71,11 @@ if not st.session_state.is_initialized:
 for idx, message in enumerate(st.session_state.chat_history):
     with st.chat_message(message["role"]):
         st.write(message["content"])
+        # 修改：总是显示引用部分，即使是"No source documents found"
         if "citations" in message and message["citations"]:
-            with st.expander("📚 引用文献"):
-                st.markdown("### 参考文献")
+            with st.expander("📚 References", expanded=False):
                 for citation in message["citations"]:
-                    st.markdown(f"{citation}")
+                    st.markdown(citation)
 
 if prompt := st.chat_input("Ask your question about oocyte research..."):
     st.session_state.chat_history.append({"role": "user", "content": prompt})
@@ -86,40 +86,64 @@ if prompt := st.chat_input("Ask your question about oocyte research..."):
         else:
             with st.spinner("Researching..."):
                 try:
-                    # get response
+                    # Get response from RAG pipeline
                     response = st.session_state.rag_pipeline.ask(prompt)
-
-                    if "result" in response:
-                        result = response["result"]
-                        answer_text = result.get("answer", "can't get answer")
-                        citations = result.get("sources", [])
-                    elif "answer" in response and "source_documents" in response:  
-                        answer_text = response["answer"]
-                        source_documents = response["source_documents"]
-                        citations = [doc.metadata.get("source", "unknown source") for doc in source_documents if hasattr(doc, 'metadata')]
+                    
+                    # Debug information
+                    print(f"Response keys: {response.keys() if isinstance(response, dict) else 'Not a dict'}")
+                    
+                    # Extract answer and citations
+                    if isinstance(response, dict):
+                        answer_text = response.get("answer", "Could not generate an answer")
+                        
+                        # Try to get citations from different possible response formats
+                        if "formatted_citations" in response:
+                            formatted_citations = response["formatted_citations"]
+                        elif "source_documents" in response:
+                            # Format source documents into citations
+                            source_docs = response["source_documents"]
+                            formatted_citations = []
+                            for doc in source_docs:
+                                if hasattr(doc, 'metadata'):
+                                    source = doc.metadata.get('source', 'Unknown source')
+                                    paper_title = doc.metadata.get('paper_title', '')
+                                    page = doc.metadata.get('page', '')
+                                    
+                                    citation = f"**Source**: {source}"
+                                    if paper_title:
+                                        citation += f" | **Title**: {paper_title}"
+                                    if page:
+                                        citation += f" | **Page**: {page}"
+                                    
+                                    formatted_citations.append(citation)
+                            
+                            if not formatted_citations:
+                                formatted_citations = ["No source documents found"]
+                        else:
+                            formatted_citations = ["No source information available"]
                     else:
-                        st.error(f"Unexpected response format: {response.keys() if isinstance(response, dict) else type(response)}")
-                        answer_text = "can't get answer"
-                        citations = []
-
-                    # update chat history
+                        answer_text = str(response)
+                        formatted_citations = ["No source information available"]
+                    
+                    # Update chat history with answer and citations
                     st.session_state.chat_history.append({
                         "role": "assistant",
                         "content": answer_text,
-                        "citations": citations or ["无引用来源"]
+                        "citations": formatted_citations
                     })
-
-                    # show response
+                    
+                    # Display answer
                     st.write(answer_text)
-
-                    # show citation
-                    if citations:
-                        with st.expander("📚 引用文献"):
-                            st.markdown("### 参考文献")
-                            for citation in citations:
-                                st.markdown(f"{citation}")
+                    
+                    # 修改：总是显示引用部分，即使是"No source documents found"
+                    with st.expander("📚 References", expanded=False):
+                        for citation in formatted_citations:
+                            st.markdown(citation)
+                                
                 except Exception as e:
                     st.error(f"Error generating response: {str(e)}")
+                    import traceback
+                    st.error(traceback.format_exc())
 
 st.markdown("---")
 col1, col2 = st.columns(2)
@@ -131,4 +155,22 @@ with col1:
 
 with col2:
     if st.button("Export Chat"):
-        st.info("Export feature coming soon!")
+        # Create a formatted chat export
+        chat_export = "# Oocyte Research Chat Export\n\n"
+        for msg in st.session_state.chat_history:
+            role = "🧑‍💼 User" if msg["role"] == "user" else "🤖 Assistant"
+            chat_export += f"## {role}\n\n{msg['content']}\n\n"
+            # 修改：总是包含引用，即使是"No source documents found"
+            if msg["role"] == "assistant" and "citations" in msg and msg["citations"]:
+                chat_export += "### References\n\n"
+                for citation in msg["citations"]:
+                    chat_export += f"- {citation}\n"
+                chat_export += "\n---\n\n"
+        
+        # Download button for the chat export
+        st.download_button(
+            label="Download Chat",
+            data=chat_export,
+            file_name="oocyte_research_chat.md",
+            mime="text/markdown"
+        )
