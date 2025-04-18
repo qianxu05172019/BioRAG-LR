@@ -33,6 +33,16 @@ def main():
     
     print(f"Successfully processed {len(documents)} document chunks.")
     
+    # 打印一些文档元数据样例
+    if documents:
+        print("\n文档元数据样例:")
+        for i, doc in enumerate(documents[:3]):  # 只打印前3个文档的元数据
+            print(f"Document {i+1}:")
+            print(f"  Source: {doc.metadata.get('source', 'Unknown')}")
+            print(f"  Paper Title: {doc.metadata.get('paper_title', 'Unknown')}")
+            print(f"  Page: {doc.metadata.get('page', 'Unknown')}")
+            print(f"  Content preview: {doc.page_content[:100]}...\n")
+    
     # create vector
     print("Creating vector store (this may take a while)...")
     try:

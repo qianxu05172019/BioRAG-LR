@@ -72,9 +72,10 @@ for idx, message in enumerate(st.session_state.chat_history):
     with st.chat_message(message["role"]):
         st.write(message["content"])
         if "citations" in message and message["citations"]:
-            with st.expander("View Citations"):
+            with st.expander("📚 引用文献"):
+                st.markdown("### 参考文献")
                 for citation in message["citations"]:
-                    st.markdown(f"*{citation}*")
+                    st.markdown(f"{citation}")
 
 if prompt := st.chat_input("Ask your question about oocyte research..."):
     st.session_state.chat_history.append({"role": "user", "content": prompt})
@@ -105,7 +106,7 @@ if prompt := st.chat_input("Ask your question about oocyte research..."):
                     st.session_state.chat_history.append({
                         "role": "assistant",
                         "content": answer_text,
-                        "citations": citations or ["From Knowledege bank"]
+                        "citations": citations or ["无引用来源"]
                     })
 
                     # show response
@@ -113,9 +114,10 @@ if prompt := st.chat_input("Ask your question about oocyte research..."):
 
                     # show citation
                     if citations:
-                        with st.expander("View Citations"):
+                        with st.expander("📚 引用文献"):
+                            st.markdown("### 参考文献")
                             for citation in citations:
-                                st.markdown(f"*{citation}*")
+                                st.markdown(f"{citation}")
                 except Exception as e:
                     st.error(f"Error generating response: {str(e)}")
 
